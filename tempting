@@ -1,0 +1,90 @@
+import pygame
+import random
+
+# Initialize Pygame
+pygame.init()
+
+# Screen dimensions
+WIDTH, HEIGHT = 800, 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Tempting Game")
+
+# Colors
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+
+# Player settings
+player_size = 50
+player_x = WIDTH // 2
+player_y = HEIGHT - player_size - 10
+player_speed = 5
+
+# Tempting Items
+item_size = 30
+item_x = random.randint(0, WIDTH - item_size)
+item_y = 0
+item_speed = 3
+
+# Obstacles
+obstacle_size = 40
+obstacle_x = random.randint(0, WIDTH - obstacle_size)
+obstacle_y = 0
+obstacle_speed = 4
+
+# Score
+score = 0
+font = pygame.font.Font(None, 36)
+
+def draw_objects():
+    screen.fill(WHITE)
+    pygame.draw.rect(screen, GREEN, (player_x, player_y, player_size, player_size))
+    pygame.draw.rect(screen, RED, (item_x, item_y, item_size, item_size))
+    pygame.draw.rect(screen, BLACK, (obstacle_x, obstacle_y, obstacle_size, obstacle_size))
+    score_text = font.render(f"Score: {score}", True, BLACK)
+    screen.blit(score_text, (10, 10))
+    pygame.display.flip()
+
+running = True
+while running:
+    pygame.time.delay(30)
+    
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+    
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT] and player_x > 0:
+        player_x -= player_speed
+    if keys[pygame.K_RIGHT] and player_x < WIDTH - player_size:
+        player_x += player_speed
+    
+    # Move item
+    global item_y, item_x, obstacle_y, obstacle_x, score
+    item_y += item_speed
+    if item_y > HEIGHT:
+        item_y = 0
+        item_x = random.randint(0, WIDTH - item_size)
+    
+    # Move obstacle
+    obstacle_y += obstacle_speed
+    if obstacle_y > HEIGHT:
+        obstacle_y = 0
+        obstacle_x = random.randint(0, WIDTH - obstacle_size)
+    
+    # Collision detection
+    if (player_x < item_x + item_size and player_x + player_size > item_x and
+            player_y < item_y + item_size and player_y + player_size > item_y):
+        score += 1
+        item_y = 0
+        item_x = random.randint(0, WIDTH - item_size)
+    
+    if (player_x < obstacle_x + obstacle_size and player_x + player_size > obstacle_x and
+            player_y < obstacle_y + obstacle_size and player_y + player_size > obstacle_y):
+        print("Game Over! Final Score:", score)
+        running = False
+    
+    draw_objects()
+
+pygame.quit()
